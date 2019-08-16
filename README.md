@@ -6,10 +6,11 @@
 
       
 # License
-    Our code is released under MIT license (see License file for details)
+Our code is released under MIT license (see License file for details)
 
 # Citation
-    If you find this code useful, please consider citing our paper
+If you find this code useful, please consider citing our paper
+
 ```
 @inproceedings{agarwal2019quadric,
 title={Learning Embedding of 3D models with Quadric Loss},
