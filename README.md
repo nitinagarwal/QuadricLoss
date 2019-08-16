@@ -1,4 +1,5 @@
-## Emebedding of 3D models with Quadric Loss [[Project Page]](tbd)<br>
+# Emebedding 3D models with Quadric Loss 
+### [[Project Page]](tbd)<br>
 
 
 
