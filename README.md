@@ -1,4 +1,4 @@
-# Emebedding 3D models with Quadric Loss [[Project Page]](tbd)<br>
+# Emebedding 3D models with Quadric Loss [[Project Page]](tbd) <br>
 
 
 
@@ -11,11 +11,11 @@
 # Citation
     If you find this code useful, please consider citing our paper
 ```
-    @inproceedings{agarwal2019quadric,
-      title={Learning Embedding of 3D models with Quadric Loss},
-      author={Agarwal, Nitin and Yoon, Sung-eui and Gopi, M},
-      booktitle={BMVC},
-      year={2019}}
+@inproceedings{agarwal2019quadric,
+title={Learning Embedding of 3D models with Quadric Loss},
+author={Agarwal, Nitin and Yoon, Sung-eui and Gopi, M},
+booktitle={BMVC},
+year={2019}}
 ```
 
 # Acknowledgments
