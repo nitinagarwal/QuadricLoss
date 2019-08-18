@@ -1,15 +1,15 @@
-# Emebedding 3D models with Quadric Loss [[Project Page]](tbd) <br>
+# Emebedding 3D models with Quadric Loss 
+### BMVC 2019 [[Paper]](https://arxiv.org/abs/1907.10250)[[Project Page]](https://www.ics.uci.edu/~agarwal/quadLoss/index.html)
 
-
-
-# Getting Started
+## Getting Started
 
       
-# License
-    Our code is released under MIT license (see License file for details)
+## License
+Our code is released under MIT license (see License file for details)
 
-# Citation
-    If you find this code useful, please consider citing our paper
+## Citation
+If you find this code useful, please consider citing our paper
+
 ```
 @inproceedings{agarwal2019quadric,
 title={Learning Embedding of 3D models with Quadric Loss},
@@ -18,6 +18,6 @@ booktitle={BMVC},
 year={2019}}
 ```
 
-# Acknowledgments
+## Acknowledgments
 This code design was adopted from
 [pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix).`
