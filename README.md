@@ -4,12 +4,21 @@
 ## Getting Started
 
       
+<<<<<<< HEAD
 ## License
 Our code is released under MIT license (see License file for details)
 
 ## Citation
 If you find this code useful, please consider citing our paper
 
+=======
+# License
+Our code is released under MIT license (see License file for details)
+
+# Citation
+If you find this code useful, please consider citing our paper
+
+>>>>>>> 98692990a6e01958cbbcc70804aab8293c8da47c
 ```
 @inproceedings{agarwal2019quadric,
 title={Learning Embedding of 3D models with Quadric Loss},
