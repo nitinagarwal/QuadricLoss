@@ -6,7 +6,7 @@ python train.py \
     --dataDir /home/minions/Dropbox/GraphicsLab/Projects/3D_Content_Creation/data/all_data \
     --num_points 2500 \
     --cls abc_2.5k \
-    --batchSize 8 \
+    --batchSize 4 \
     --nepoch 300 \
     --logf log1 \
     --chamLoss_wt 0.0 \
