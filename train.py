@@ -28,7 +28,7 @@ from provider import *
 # ==============================================PARAMETERS======================================== #
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataDir', type=str, default=" ", help='input data dir')
-parser.add_argument('--augment', type=bool, default=True,  help='augmentation')
+parser.add_argument('--augment', type=bool, default=False,  help='augmentation')
 parser.add_argument('--num_points', type=int, default = 2500,  help='number of points')
 parser.add_argument('--small', type=bool, default=False,  help='train with small dataset')
 parser.add_argument('--cls', nargs="+", type=str, help='shape dataset')
@@ -114,7 +114,6 @@ if opt.model != 'None':
 
 
 optimizer = optim.Adam(network.parameters(), lr = opt.lr, weight_decay=opt.wd)
-# scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=opt.lr_steps, gamma=opt.lr_decay) 
 scheduler = lr_scheduler.StepLR(optimizer, step_size=opt.lr_step_size, gamma=opt.lr_decay) 
 
 
@@ -152,13 +151,13 @@ def train(ep):
         points = points.transpose(2,1)
 
         chamLoss, corres, _ = chamferLoss(points, recon_points, average=False)
-        l1Loss = l1_loss(points, pointsReconstructed)
+        l1Loss = l1_loss(points, recon_points)
 
         corres = corres.type(torch.cuda.LongTensor)
         recon_vertices = torch.cat([torch.index_select(a, 0, ind).unsqueeze(0) for a, ind in zip(recon_points, corres)])
         recon_points = recon_vertices
         
-        quadLoss = quadratic_error_loss(Q, recon_points)
+        quadLoss = quadric_loss(Q, recon_points)
         sufNorLoss = surface_normal_loss(points, adj, recon_points, normal)
         sufLoss = surfaceLoss(recon_points, face_coords)
 
@@ -184,7 +183,7 @@ def train(ep):
             )
             
             viz.scatter(
-                X = pointsReconstructed[0].data.cpu(),
+                X = recon_points[0].data.cpu(),
                 win = output_3D, 
                 env = opt.viz_env,
                 opts=dict(title='Recon PC [%s]' %(opt.logf), markersize = 1)
@@ -218,7 +217,7 @@ def test(ep):
             points = points.transpose(2,1)
 
             chamLoss, corres, _ = chamferLoss(points, recon_points, average=False)
-            l1Loss = l1_loss(points, pointsReconstructed)
+            l1Loss = l1_loss(points, recon_points)
 
             corres = corres.type(torch.cuda.LongTensor)
             recon_vertices = torch.cat([torch.index_select(a, 0, ind).unsqueeze(0) for a, ind in zip(recon_points, corres)])
@@ -246,7 +245,7 @@ def test(ep):
                 )
                 
                 viz.scatter(
-                    X = pointsReconstructed[0].data.cpu(),
+                    X = recon_points[0].data.cpu(),
                     win = val_output_3D, 
                     env = opt.viz_env,
                     opts=dict(title='Val Recon PC [%s]' %(opt.logf), markersize = 1)

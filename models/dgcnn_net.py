@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 from init import *
 
-sys.path.append('../utils/')
+sys.path.append('./utils/')
 from pc_utils import model_summary
 
 

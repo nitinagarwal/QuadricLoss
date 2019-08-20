@@ -9,6 +9,7 @@ import scipy.sparse
 import torch
 import torch.utils.data as data
 
+sys.path.append('./utils')
 from pc_utils import *
 
 

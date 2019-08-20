@@ -46,7 +46,6 @@ def l1_loss(V1, V2, average=True):
     """ Standard L1 loss 
     Input : V1, V2 = Batchsize x N x Dimension
     average = True (mean) False(sum over all pts)
-    dim = True (mean over dim) False (take sum)
     Output : Loss = L1 loss
     """
 
@@ -54,7 +53,7 @@ def l1_loss(V1, V2, average=True):
     Loss = torch.sum(Loss, 2)  # sum error in the last dimension
     
     if average:
-        return torch.mean(Loss, 1)
+        Loss = torch.mean(Loss, 1)
     else:
         Loss = torch.sum(Loss, 1)  # sum the error in all points
         
