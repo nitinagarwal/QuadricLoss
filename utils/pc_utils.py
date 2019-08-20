@@ -1,5 +1,4 @@
-# Copyright (c) Nitin Agarwal 
-# Last Modified:      Tue 20 Aug 2019 01:48:53 PM PDT
+# Copyright (c) 2019 Nitin Agarwal (agarwal@uci.edu)
 
 import os
 import random
@@ -117,8 +116,9 @@ def load_xyz_data(filename):
 
 def save_xyz_data(filename, ver):
     """writes the points to a xyz file"""
-    
-    write_path = filename.split('.')[0] + '.xyz'
+   
+    head, name = os.path.split(filename)
+    write_path = os.path.join(head, name.split('.')[0] + '.xyz')
     np.savetxt(write_path, ver)
 
 
@@ -528,7 +528,7 @@ def pt2triangle(query, vertices, f, v_normal):
                 tt = -e/c
 
     else:
-        NotImplementedError("region not selected")
+        raise NotImplementedError("region not selected")
             
 
     p0 = B + ss*E0 + tt*E1
@@ -607,7 +607,7 @@ def farthest_point_sample(pts, K):
     """
 
     if pts.shape[0] < K:
-        NotImplementedError("Not enough points in mesh for FPS")
+        raise NotImplementedError("Not enough points in mesh for FPS")
     
     def calc_distances(p0, points):
         return ((p0 - points)**2).sum(axis=1)
@@ -729,10 +729,6 @@ def scale_vertices_by_axis(vertices, scale, axis):
 
     scaled_data = np.zeros(vertices.shape, dtype=np.float32)
     
-    # shear_matrix = np.array([[1, shear_y, 0],
-    #                             [0, 1, shear_z],
-    #                             [shear_x, 0, 1]])
-    
     if axis == 1:
         scale_matrix = np.array([[scale, 0, 0],
                                     [0, 1, 0],
@@ -746,7 +742,7 @@ def scale_vertices_by_axis(vertices, scale, axis):
                                     [0, 1, 0],
                                     [0, 0, scale]])
     else:
-        NotImplementedError('Choose a valid rotation axis(1-Xaxis, 2-Yaxis, 3-Zaxis)')
+        raise NotImplementedError('Choose a valid rotation axis(1-Xaxis, 2-Yaxis, 3-Zaxis)')
 
     scaled_data = np.dot(vertices, scale_matrix)
     return scaled_data
@@ -796,7 +792,7 @@ def rotate_vertices_by_angle_by_axis(vertices, rotation_angle, rotation_axis):
                                     [sinval, cosval, 0],
                                     [0, 0, 1]])
     else:
-        NotImplementedError('Choose a valid rotation axis(1-Xaxis, 2-Yaxis, 3-Zaxis)')
+        raise NotImplementedError('Choose a valid rotation axis(1-Xaxis, 2-Yaxis, 3-Zaxis)')
 
     rotated_data = np.dot(vertices, rotation_matrix)
     return rotated_data
@@ -922,43 +918,12 @@ if __name__ == "__main__":
     V, F = load_obj_data(filename)
     Q = compute_Q_matrix(V, F)
 
-    sz = V.shape[0]
-
-    for ii in range(100):
-        v_temp = np.random.randn(sz,3)
-        v_temp = np.concatenate((v_temp, np.ones((sz,1))), axis=1)
-
-        a = np.reshape(v_temp, (sz,4,1))
-        b = np.transpose(a, (0,2,1))
-
-        v_temp_outer = np.matmul(a, b)
-        
-        v_temp_outer = np.reshape(v_temp_outer, (sz,-1))
-        Q_temp = np.reshape(Q, (sz,-1))
- 
-        ans = np.sum((v_temp_outer * Q_temp), axis=-1)
-
-        _sum = 0
-        for i, v in enumerate(v_temp, 0):
-            v = np.array([v[0], v[1], v[2], 1])
-            
-            a = np.matmul(np.transpose(v), Q[i,:])
-            b = np.matmul(a, v)
-            _sum += b
-            # if(ans[i] != b):
-            assert(ans[i]>=0 and b>=0)
-            # if(b < 0):
-                # print(ans[i], ' ', b)
-        # print(np.sum(ans))
-        # print( np.sum(ans), '         ', _sum)
-        print('%d done %f  %f' % (ii, np.sum(ans), _sum))
-
-
-    # Vout = farthest_point_sample(V, 3000)
-    # Vout = Variable(torch.from_numpy(Vout))
-    # save_xyz_data('/home/minions/Desktop/chair_0001.xyz', Vout)
-    # f = get_face_coordinates(V, F)
-    # print(f, f.shape)
+    Vout = farthest_point_sample(V, 1200)
+    print(Vout.shape)
+    
+    save_xyz_data('../data/sample.xyz', Vout)
+    f = get_face_coordinates(V, F)
+    print(f.shape)
 
 
 

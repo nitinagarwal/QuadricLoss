@@ -1,10 +1,8 @@
-# Copyright (c) Nitin Agarwal 
-# Last Modified:      Mon 19 Aug 2019 02:37:38 PM PDT
+# Copyright (c) 2019 Nitin Agarwal (agarwal@uci.edu)
 
 from __future__ import print_function
 import numpy as np
 import os
-import os.path
 import sys
 import scipy.sparse
 
@@ -120,7 +118,7 @@ class getDataset(data.Dataset):
 
 if __name__ == "__main__":
     
-    path = '/home/minions/Dropbox/GraphicsLab/Projects/3D_Content_Creation/data/all_data'
+    path = '../data'
 
     obj = getDataset(root = path, train=False, data_augment=False, small=False, category=['abc_2.5k'])
     

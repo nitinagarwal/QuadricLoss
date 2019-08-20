@@ -1,5 +1,5 @@
-# Copyright (c) Nitin Agarwal 
-# Last Modified:      Tue 20 Aug 2019 01:45:20 PM PDT
+# Copyright (c) 2019 Nitin Agarwal (agarwal@uci.edu)
+
 
 import numpy as np
 import sys

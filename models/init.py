@@ -1,5 +1,5 @@
-# Copyright (c) Nitin Agarwal (agarwal@uci.edu)
-# Last Modified:      Tue 20 Aug 2019 11:45:14 AM PDT
+# Copyright (c) 2019 Nitin Agarwal (agarwal@uci.edu)
+
 
 # borrowed from DGCNN (https://github.com/WangYueFt/dgcnn/blob/master/pytorch/model.py)
 from __future__ import print_function

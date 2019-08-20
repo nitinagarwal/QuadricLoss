@@ -1,5 +1,5 @@
-# Copyright (c) Nitin Agarwal (agarwal@uci.edu)
-# Last Modified:      Tue 20 Aug 2019 12:14:32 PM PDT
+# Copyright (c) 2019 Nitin Agarwal (agarwal@uci.edu)
+
 
 from __future__ import print_function
 import sys
