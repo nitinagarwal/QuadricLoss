@@ -1,3 +1,6 @@
+# Copyright (c) Nitin Agarwal 
+# Last Modified:      Tue 20 Aug 2019 01:48:53 PM PDT
+
 import os
 import random
 import numpy as np
@@ -5,13 +8,6 @@ from plyfile import (PlyData, PlyElement)
 
 import scipy.sparse
 import scipy.spatial as spatial
-
-""" These functions are used to compute the baselines  --- make sure their names do not coincide
-
-a) PointNet
-b) AtlasNet
-c) DynamicGraphCNN
-"""
 
 
 # --------------------------------
@@ -22,7 +18,6 @@ def load_ply_data(filename):
     """ read ply file, only vertices and faces """
 
     plydata = PlyData.read(filename)
-    # print(plydata.elements[:])
 
     vertices = plydata['vertex'].data[:]
     vertices = np.array([[x, y, z] for x,y,z in vertices])
@@ -39,25 +34,21 @@ def save_ply_data(filename, vertex, face):
     vertices = np.zeros(vertex.shape[0], dtype=[('x', 'f4'), ('y', 'f4'),('z', 'f4')])
     for i in range(vertex.shape[0]):
             vertices[i] = (vertex[i][0], vertex[i][1], vertex[i][2])
-    # print(vertex, vertex.dtype)
    
     faces = np.zeros(face.shape[0], dtype=[('vertex_indices', 'i4', (3,))])
     for i in range(face.shape[0]):
             faces[i] = ([face[i][0], face[i][1], face[i][2]])
-    # print(faces.shape, faces.dtype)
 
     e1 = PlyElement.describe(vertices, 'vertex')
     e2 = PlyElement.describe(faces, 'face')
     
     PlyData([e1, e2], text=True).write(filename)
-    # print('file saved')
 
 def load_obj_data(filename):
     """
     A simply obj reader which reads vertices and faces only. 
-    i.e. lines starting with v and f only
-    in obj files face index starts with 1
     """
+    
     ver =[]
     fac = []
     if not filename.endswith('obj'):
@@ -80,9 +71,8 @@ def load_obj_data(filename):
 def save_obj_data(filename, vertex, face):
     """
     saves only vertices and faces
-    i.e. lines starting with v and f only
-    in obj files face index starts with 1
     """
+    
     numver = vertex.shape[0]
     numfac = face.shape[0]
 
@@ -100,26 +90,14 @@ def save_obj_data(filename, vertex, face):
             f.write('f %d %d %d' %(F[0]+1, F[1]+1, F[2]+1))
             f.write('\n')
 
-def save_xyz_data(filename, ver):
-    """writes the points to a xyz file"""
-    
-    write_path = filename.split('.')[0] + '.xyz'
-
-    # ver = ver.squeeze()
-    # ver = ver.data.cpu()
-    # ver = ver.numpy()
-    # ver = ver.reshape(-1,3) 
-
-    np.savetxt(write_path, ver)
-    print('file written to %s' %(write_path))
-
-
 def load_xyz_data(filename):
     """
-    simple xyz reader which reads can vertices and normals if presents
+    simple xyz reader which reads vertices (and normals if presents)
     """
+
     ver =[]
     normal = []
+    
     if not filename.endswith('xyz'):
         sys.exit('the input file is not a xyz file')
 
@@ -137,6 +115,14 @@ def load_xyz_data(filename):
 
     return V, N
 
+def save_xyz_data(filename, ver):
+    """writes the points to a xyz file"""
+    
+    write_path = filename.split('.')[0] + '.xyz'
+    np.savetxt(write_path, ver)
+
+
+
 # --------------------------------
 # MESH UTILS
 # --------------------------------
@@ -144,12 +130,14 @@ def load_xyz_data(filename):
 def get_adjacency_matrix(vertex, faces, K_max='None'):
     """ computes the adjacency matrix 
 
-    input: vertex: (N x 3)
-           faces: (F x 3) triangle mesh 
+    Input: vertex = (N x 3)
+           faces = (F x 3) triangle mesh 
 
-    output: sparase adjacency matrix: (N x K) where K is the max numbers of neighbours. Each row lists the vertex indices of the neighbhours. index starts from 1. 
-    The rows are padded with zeros.
+    Output: sparase adjacency matrix = (N x K) where K is the max numbers of neighbours. 
+            Each row lists the vertex indices of the neighbhours. index starts from 1. 
+            The rows are padded with zeros.
     """
+
     num_pts = len(vertex)
     K = 0     # max number of neighbours
     adj = []
@@ -168,13 +156,10 @@ def get_adjacency_matrix(vertex, faces, K_max='None'):
             idx = [x+1 for x in idx]            # because the index starts from 1 
             if(len(idx) > K):
                 K = len(idx)
-            # print('list ' ,idx)
         adj.append(idx)
-    # print(K)
 
     if K_max != 'None':
         K = K_max
-        # K = 30 # computing adjacency
 
     adjacency = np.zeros((1, K), dtype=np.int16)
     for i in range(len(adj)):
@@ -188,16 +173,16 @@ def get_adjacency_matrix(vertex, faces, K_max='None'):
 def get_face_coordinates(vertex, faces, K_max='None'):
     """ computes the face_cooridinates used for surface Loss 
 
-    input: vertex: (N x 3)
-           faces: (F x 3) triangle mesh 
+    Input: vertex = (N x 3)
+           faces = (F x 3) triangle mesh 
 
-    output: face_cooridnates (NxKx9) 
-            where K is the max numbers of neighbours. Each row lists vertex coordinates for the one ring neighbourhood faces 
-    The rows are padded with dummy face coordinates 
+    Output: face_cooridnates = (NxKx9) where K is the max numbers of neighbours. 
+            Each row lists vertex coordinates for the one ring neighbourhood faces 
+            The rows are padded with dummy face coordinates 
     """
 
     num_pts = len(vertex)
-    K = 0     # max number of neighbours
+    K = 0     
     adj = []
 
     # computing the value of K
@@ -228,7 +213,6 @@ def get_face_coordinates(vertex, faces, K_max='None'):
 
         if(len(idx)==0):
             temp = np.tile(dummy_faces, (K_max, 1))
-            
         else:
             idx = idx[:,0]
             v1 = vertex[faces[idx,0],:]
@@ -243,12 +227,13 @@ def get_face_coordinates(vertex, faces, K_max='None'):
 
 
 def compute_Q_matrix(vertices, faces):
-    """ computes Q matrix for each vertex
+    """ computes Quadric matrix for each vertex
 
-    input: vertex: (N x 3)
-           faces: (F x 3) triangle mesh 
+    Input: vertex = (N x 3)
+           faces = (F x 3) triangle mesh 
 
-    output: Q: (N x 4 x 4): For each vertex, computes the summation of all Q's for the triangles incident at that vertex
+    Output: Q = (N x 4 x 4) For each vertex, computes the summation of all Q's for the triangles incident 
+            at that vertex
     """
 
     num_pts = len(vertices)
@@ -259,11 +244,6 @@ def compute_Q_matrix(vertices, faces):
         idx = np.argwhere(faces == i)
 
         if(len(idx) > 0): 
-            # throw error isolate point
-            # print('-------ERROR: Mesh is NOT CONNECTED (%d is isolated)------' % (i))
-            # sys.exit(1)
-
-        # else:
             q = np.zeros((4,4), dtype=float)
 
             length = len(idx)
@@ -279,40 +259,16 @@ def compute_Q_matrix(vertices, faces):
     return Q
 
 
-def quadric_matrix_analysis(Q, clip=0.01):
-    """
-    Returns the number of eigen values greater than clip for each Q matrix
-    The higher the number, that point has high curvature
-    # non-zero eigen value --> 3(corner), 2(edge), 1(plane) 
-
-    Input: Q (N x 4 x 4)
-    Output: scale_factor (Nx1)
-    """
-
-    num_pts = len(Q)
-    scale_factor = np.zeros((num_pts, 1), dtype=float)
-
-    for i, q in enumerate(Q):
-
-        _, s, _ = np.linalg.svd(q)
-        non_zero_eigen_values = len(np.argwhere(s>clip))
-       
-        # scale_factor[i] = non_zero_eigen_values
-        if non_zero_eigen_values == 2:
-            scale_factor[i] = 1          # training with only corner pts
-        else:
-            scale_factor[i] = 0
-
-    # scale_factor = np.exp(scale_factor)
-    return scale_factor 
-
-
 def get_plane(v1, v2, v3):
 
-    """ Get the Q matrix for a triangle face
-        equation of plane is ax + by + cz + d = 0
-        where <a, b, c> is the normalized normal vector
+    """ Compute the Q matrix for a single triangle 
+    Input: vertex = (N x 3)
+
+    Output: Q = (4x4) 
+            equation of plane is ax + by + cz + d = 0
+            where <a, b, c> is the normalized normal vector
     """
+
     v12 = v1 - v2
     v13 = v1 - v3
 
@@ -320,25 +276,24 @@ def get_plane(v1, v2, v3):
     mag = np.sqrt(np.dot(normal, normal))
 
     #avoid divide by zero
-    mag = mag + 10**-7   
-    # if(mag==0 or math.isnan(mag)):
-    #     print('normal vec: ', normal)
-    #     print(v1, v2, v3)
-    #     print(v12, v13)
-    normal = normal / mag
+    if mag != 0:
+        normal = normal / mag
+
+    assert( np.linalg.norm(normal)==0 or np.abs(1.0 - np.linalg.norm(normal)) < 1e-10)
     d =  - np.dot(normal, v1)
 
     equ = np.array([normal[0], normal[1], normal[2], d])
     Q = np.outer(equ,equ)
-
+    
     return Q
 
 
 def compute_face_normals(vertices, faces):
     """
-    Input: vertices (Nx3)
-           faces (Fx3)
-    Output: face normals (Fx3)
+    Input: vertices = (Nx3)
+           faces = (Fx3)
+    
+    Output: face normals = (Fx3)
     """
     
     num_fac = len(faces)
@@ -349,20 +304,23 @@ def compute_face_normals(vertices, faces):
         e20 = vertices[faces[idx,2],:] - vertices[faces[idx,0],:] 
         n_idx = np.cross(e10, e20)
         mag = np.sqrt(np.dot(n_idx, n_idx))
-        if mag==0:
-            normals[idx,:] = n_idx
-        else:
-            normals[idx,:] = n_idx/mag
+        
+        if mag!=0:
+            n_idx = n_idx/mag
     
+        normals[idx,:] = n_idx
+
     return normals
 
 
 def compute_vertex_normals(vertices, faces):
     """
-    Input: vertices (Nx3)
-           faces (Fx3)
-    Output: vertex normals (Nx3)
+    Input: vertices = (Nx3)
+           faces = (Fx3)
+
+    Output: vertex normals = (Nx3) 
     """
+
     num_ver = len(vertices)
     normals = np.zeros((num_ver, 3), dtype=float)
 
@@ -371,11 +329,10 @@ def compute_vertex_normals(vertices, faces):
     for i in range(num_ver):
         idx = np.argwhere(faces == i)
 
-        if(len(idx)==0):
-            continue        # isolated vertex
-        else:
+        if(len(idx)>0):     # not isolated vertex
+            
             vert_normal = np.sum(face_normals[idx[:,0]], axis=0)
-            vert_normal = vert_normal/len(idx)
+            vert_normal = vert_normal/len(idx)       #average of face normals
 
             mag = np.linalg.norm(vert_normal)
             if mag != 0:
@@ -387,15 +344,18 @@ def compute_vertex_normals(vertices, faces):
 
 
 def closest_triangles(query_pts, ver, faces, tree):
-    """ for each query pt find the closest pt among the mesh vertices and return all the triangles incident on that closest point.
+    """ for each query pt find the closest pt among the mesh vertices and return 
+        all the triangles incident on that closest point.
 
-    Input : query_pts = Nx3
+    Input : query_pts = (N'x3)
+            ver = (Nx3)
+            faces = (Fx3)
             tree = KDTree formed by the mesh vertices
+    
     Ouput: indx = for each query pt, indices of closest triangles
            dist = for each query pt, the distance 
     """
 
-    # tree = spatial.KDTree(ver)
     dis, ids = tree.query(query_pts)
     
     indx = []
@@ -419,6 +379,7 @@ def pt2triangle(query, vertices, f, v_normal):
            vertices = Nx3
            f = face ids in question
            v_normal = Nx3 (vertex normals)
+    
     Ouput: pt = (3) closest pt on the triangle
            d = its distance to the query pt
            n = its normal (face normal)
@@ -432,15 +393,6 @@ def pt2triangle(query, vertices, f, v_normal):
     v2 = v2.astype(float)
     v3 = v3.astype(float)
     
-    # v12 = v1 - v2
-    # v13 = v1 - v3
-    # normal =  np.cross(v12, v13)
-    # mag = np.sqrt(np.sum((normal*normal)))
-    # if mag==0:
-    #     n = normal
-    # else:
-    #     n = normal/mag
-
     # closest pt = B + s*E0 + t*E1
     B = v1
     E0 = v2 - v1
@@ -597,8 +549,8 @@ def distance_pt2mesh(vertices, faces, query_pts):
     Input: vertices = Nx3
            faces = Fx3
            query_pts= N'x3
-    Output:
-           output_pts = N'x3  (closet pt on mesh to query pts)
+    
+    Output:output_pts = N'x3  (closet pt on mesh to query pts)
            dist = N' (square of the distance b/w those pts)
            normals = N'x3 (normals of the closest pt on the mesh)
     """
@@ -619,7 +571,6 @@ def distance_pt2mesh(vertices, faces, query_pts):
 
     # construct the KDtree and search for candidate faces
     # idx = N'xK  a list (candidate faces)
-    
     tree = spatial.KDTree(vertices)
     idx, _ = closest_triangles(query_pts, vertices, faces, tree)
 
@@ -628,7 +579,6 @@ def distance_pt2mesh(vertices, faces, query_pts):
         query = query_pts[ii,:]
         candidate_faces = faces[idx[ii],:]
         P, D, N = [], [], []
-        # print(candidate_faces.shape)
 
         for f in candidate_faces:
         
@@ -641,16 +591,20 @@ def distance_pt2mesh(vertices, faces, query_pts):
         index = np.argmin(D)
 
         output_pts[ii,:] = P[index]
-        # dist[ii] = np.sqrt(D[index])
         dist[ii] = D[index]
         normals[ii,:] = N[index]
 
     return output_pts, dist, normals
 
 
-
 def farthest_point_sample(pts, K):
-    """ farthest point sampling"""
+    """ Farthest point sampling
+
+    Input: pts = original points
+           K = # of pts to sample
+
+    Output: K points
+    """
 
     if pts.shape[0] < K:
         NotImplementedError("Not enough points in mesh for FPS")
@@ -671,16 +625,17 @@ def farthest_point_sample(pts, K):
 
 def uniform_sampling(vertices, faces, n_samples=1000, reverse=False):
     """ Uniform area sampling
-    Input:
-    vertices  - n x 3 matrix
-    faces     - n x 3 matrix
-    n_samples - positive integer
-    reverse - small area faces have more points
-    Output:
-    vertices - point cloud
-      (P = (1 - \sqrt{r_1})A + \sqrt{r_1} (1 - r_2) B + \sqrt{r_1} r_2 C)
-    https://chrischoy.github.io/research/barycentric-coordinate-for-mesh-sampling/
+    
+    Input: vertices  = N x 3 matrix
+           faces     = N x 3 matrix
+           n_samples = positive integer
+           reverse = small area faces have more points
+
+    Output:vertices = n_sample points
+           (P = (1 - \sqrt{r_1})A + \sqrt{r_1} (1 - r_2) B + \sqrt{r_1} r_2 C)
+           https://chrischoy.github.io/research/barycentric-coordinate-for-mesh-sampling/
     """
+
     vec_cross = np.cross(vertices[faces[:, 0], :] - vertices[faces[:, 2], :],
                        vertices[faces[:, 1], :] - vertices[faces[:, 2], :])
     face_areas = np.sqrt(np.sum(vec_cross ** 2, 1))
@@ -720,56 +675,18 @@ def uniform_sampling(vertices, faces, n_samples=1000, reverse=False):
     return P
 
 
-
-
-# AtlasNet code
-
-#initialize the weighs of the network for Convolutional layers and batchnorm layers
-def weights_init(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
-        m.weight.data.normal_(0.0, 0.02)
-    elif classname.find('BatchNorm') != -1:
-        m.weight.data.normal_(1.0, 0.02)
-        m.bias.data.fill_(0)
-
-def adjust_learning_rate(optimizer, epoch, phase):
-    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    if (epoch%phase==(phase-1)):
-        for param_group in optimizer.param_groups:
-            param_group['lr'] = param_group['lr']/10.
-
-
-class AverageValueMeter(object):
-    """Computes and stores the average and current value"""
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0.0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
-
-
-
 def jitter_vertices(vertices, sigma=0.01, mean=0, clip=0.05, percent=0.30):
-    """ Randomly jitter points based on the percent 
-        Input:
-          vertices = Nx3 array, original shape
+    """ Randomly jitter points 
+
+    Input:vertices = Nx3 array, original points
           sigma = std of gaussian noise
           mean = mean of the gaussian noise
           clip = to clip the noise
           percent = % pts jittered
-        Output:
-          Nx3 array, jittered shape 
+    
+    Output: Nx3 array, jittered points 
     """
+
     N, C = vertices.shape
 
     assert(clip > 0)
@@ -785,13 +702,13 @@ def jitter_vertices(vertices, sigma=0.01, mean=0, clip=0.05, percent=0.30):
 
 
 def scale_vertices(vertices, low_bound=0.5, high_bound=1.5):
-    """Randomly scale vertices along arbitary axes (anisotropic scaling)
+    """ Randomly scale vertices along arbitary axes (anisotropic scaling)
         scale only in x or z Not in y
-    Input:
-      Nx3 array, input shape
-      low and high bound: range of scale values allowed
-    Output:
-      Nx3 array, scale shape
+
+    Input: Nx3 array, input points
+           low and high bound: range of scale values allowed
+    
+    Output: Nx3 array, scale shape
     """
     
     scale = (high_bound-low_bound) * np.random.rand() + low_bound 
@@ -802,13 +719,14 @@ def scale_vertices(vertices, low_bound=0.5, high_bound=1.5):
 
 def scale_vertices_by_axis(vertices, scale, axis):
     """ scale vertices by axis
-    Input:
-      Nx3 array, input shape
-      scale - scale
-      axis - 1(xaxis), 2(yaxis), 3(zaxis)
-    Output:
-      Nx3 array, scaled shape
+    
+    Input: Nx3 array, input shape
+           scale = scale
+           axis = 1(xaxis), 2(yaxis), 3(zaxis)
+
+    Output: Nx3 array, scaled shape
     """
+
     scaled_data = np.zeros(vertices.shape, dtype=np.float32)
     
     # shear_matrix = np.array([[1, shear_y, 0],
@@ -835,13 +753,14 @@ def scale_vertices_by_axis(vertices, scale, axis):
 
 
 def rotate_vertices(vertices, sigma=0.1, clip=0.1):
-    """Randomly rotate vertices along arbitary axes
-    Input:
-      Nx3 array, input shape
-      clip - max range of rotation allowed
-    Output:
-      Nx3 array, rotated shape
+    """ Randomly rotate vertices along arbitary axes
+    
+    Input: Nx3 array, input shape
+           clip - max range of rotation allowed
+
+    Output: Nx3 array, rotated shape
     """
+
     rotation_angle = np.clip(sigma * np.random.randn(), -1*clip, clip) * np.pi
     rotation_axis = np.random.randint(1, 4)
 
@@ -849,14 +768,16 @@ def rotate_vertices(vertices, sigma=0.1, clip=0.1):
 
 
 def rotate_vertices_by_angle_by_axis(vertices, rotation_angle, rotation_axis):
-    """Rotate vertices along rotation axis with rotation angle
-    Input:
-      Nx3 array, input shape
-      rotation_angle - angle in radians
-      rotation_axis - 1(xaxis), 2(yaxis), 3(zaxis)
+    """ Rotate vertices along rotation axis with rotation angle
+
+    Input: Nx3 array, input shape
+           rotation_angle - angle in radians
+           rotation_axis - 1(xaxis), 2(yaxis), 3(zaxis)
+    
     Output:
       Nx3 array, rotated shape
     """
+
     rotated_data = np.zeros(vertices.shape, dtype=np.float32)
 
     cosval = np.cos(rotation_angle)
@@ -882,19 +803,55 @@ def rotate_vertices_by_angle_by_axis(vertices, rotation_angle, rotation_axis):
 
 
 def normalize_shape(vertices):
-    # normalize shape to fit inside a unit sphere
+    """normalize shape to fit inside a unit sphere"""
+    
     ver_max = np.max(vertices, axis=0)
     ver_min = np.min(vertices, axis=0)
 
     centroid = np.stack((ver_max, ver_min), 0)
     centroid = np.mean(centroid, axis=0)
-    # centroid = np.mean(vertices, axis=0)
     vertices = vertices - centroid
 
     longest_distance = np.max(np.sqrt(np.sum((vertices**2), axis=1)))
     vertices = vertices / longest_distance
     
     return vertices
+
+
+
+# --------------------------------
+# TRAINING UTILS
+# --------------------------------
+
+def weights_init(m):
+    """weight initialization for CNN and batchnorm layers"""
+    
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        m.weight.data.normal_(0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        m.weight.data.normal_(1.0, 0.02)
+        m.bias.data.fill_(0)
+
+
+class AverageValueMeter(object):
+    """Computes and stores the average and current value"""
+    
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0.0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
 
 def model_summary(model, print_layers=False):
     train_count = 0
@@ -954,16 +911,49 @@ def create_visdom_curve(viz, typ='scatter', viz_env='main'):
         opts = dict(title='TBD')
         ) 
 
-
     return graph
 
 
 
 if __name__ == "__main__":
 
-    filename = '/home/minions/Dropbox/GraphicsLab/Projects/3D_Content_Creation/data/all_data/chairs/chair_0001.ply'
+    filename = '../data/sample.obj'
 
-    V, F = load_ply_data(filename)
+    V, F = load_obj_data(filename)
+    Q = compute_Q_matrix(V, F)
+
+    sz = V.shape[0]
+
+    for ii in range(100):
+        v_temp = np.random.randn(sz,3)
+        v_temp = np.concatenate((v_temp, np.ones((sz,1))), axis=1)
+
+        a = np.reshape(v_temp, (sz,4,1))
+        b = np.transpose(a, (0,2,1))
+
+        v_temp_outer = np.matmul(a, b)
+        
+        v_temp_outer = np.reshape(v_temp_outer, (sz,-1))
+        Q_temp = np.reshape(Q, (sz,-1))
+ 
+        ans = np.sum((v_temp_outer * Q_temp), axis=-1)
+
+        _sum = 0
+        for i, v in enumerate(v_temp, 0):
+            v = np.array([v[0], v[1], v[2], 1])
+            
+            a = np.matmul(np.transpose(v), Q[i,:])
+            b = np.matmul(a, v)
+            _sum += b
+            # if(ans[i] != b):
+            assert(ans[i]>=0 and b>=0)
+            # if(b < 0):
+                # print(ans[i], ' ', b)
+        # print(np.sum(ans))
+        # print( np.sum(ans), '         ', _sum)
+        print('%d done %f  %f' % (ii, np.sum(ans), _sum))
+
+
     # Vout = farthest_point_sample(V, 3000)
     # Vout = Variable(torch.from_numpy(Vout))
     # save_xyz_data('/home/minions/Desktop/chair_0001.xyz', Vout)

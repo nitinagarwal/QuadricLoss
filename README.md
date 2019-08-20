@@ -18,6 +18,3 @@ booktitle={BMVC},
 year={2019}}
 ```
 
-## Acknowledgments
-This code design was adopted from
-[pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix).`

@@ -1,3 +1,6 @@
+# Copyright (c) Nitin Agarwal 
+# Last Modified:      Mon 19 Aug 2019 02:37:38 PM PDT
+
 from __future__ import print_function
 import numpy as np
 import os
@@ -6,32 +9,21 @@ import sys
 import scipy.sparse
 
 import torch
-from torch.autograd import Variable
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.utils.data as data
 
-from pprint import pprint
-from termcolor import colored
-
-from baseline_utils import *
+from pc_utils import *
 
 
 class getDataset(data.Dataset):
-    def __init__(self, root, train=True, data_augment=True, small=True, K_max=0, with_uv=True,
-                 template='None', layers=4, category = ['chairs', 'tables']):
+    def __init__(self, root, train=True, data_augment=True, small=False, category = ['abc_2.5k']):
         
         self.root = root
         self.train = train
-        self.data_augment = data_augment    # both rotation and jittering
-        self.K = K_max
-        self.small = small         # use small dataset or big
-        self.layers = layers
-        # self.category = ['chairs', 'tables', 'mirrors', 'doors']
+        self.data_augment = data_augment    
+        self.small = small         # test on a small dataset
 
-        shape_paths = [] #path of all mesh files
+        shape_paths = []            # path of all mesh files
         for shape_class in category:
-            # shape_class = ca
             if self.train:
                 if self.small:
                     self.file = os.path.join(self.root, shape_class, 'train.txt')
@@ -49,77 +41,32 @@ class getDataset(data.Dataset):
 
         self.datapath=[]
         if self.data_augment:
-            """ augment by scaling, random rotation, and random jitter""" 
-            # with open(self.file) as f:
+            """ data augment by scaling and rotation""" 
             for line in shape_paths:
                 
-                mesh_path = line #os.path.join(self.root,line.strip())
+                mesh_path = line 
                 mesh={}
                 mesh["rotate"] = False
-                mesh["jitter"] = False
                 mesh["scale"] = True
                 mesh["path"] = mesh_path
                 self.datapath.append(mesh)
                 
                 mesh={}
                 mesh["rotate"] = True
-                mesh["jitter"] = False
                 mesh["scale"] = False
                 mesh["path"] = mesh_path
                 self.datapath.append(mesh)
 
-                # mesh={}
-                # mesh["rotate"] = False
-                # mesh["jitter"] = True
-                # mesh["scale"] = False
-                # mesh["path"] = mesh_path
-                # self.datapath.append(mesh)
-
-                # mesh={}
-                # mesh["rotate"] = False
-                # mesh["jitter"] = True
-                # mesh["scale"] = True
-                # mesh["path"] = mesh_path
-                # self.datapath.append(mesh)
-
                 mesh={}
                 mesh["rotate"] = True
-                mesh["jitter"] = False
                 mesh["scale"] = True
                 mesh["path"] = mesh_path
                 self.datapath.append(mesh)
 
-                # mesh={}
-                # mesh["rotate"] = True
-                # mesh["jitter"] = True
-                # mesh["scale"] = False
-                # mesh["path"] = mesh_path
-                # self.datapath.append(mesh)
-                
-                # mesh={}
-                # mesh["rotate"] = True
-                # mesh["jitter"] = True
-                # mesh["scale"] = True
-                # mesh["path"] = mesh_path
-                # self.datapath.append(mesh)
-
-                # for angle in range(0,360,45):
-                #     mesh={}
-                #     ang_rad = angle*2*np.pi/360
-                #     mesh["rotate_angle"] = ang_rad
-                    # mesh["path"] = mesh_path
-                    # mesh["jitter"] = False
-
-                    # self.datapath.append(mesh)
-
-        # with open(self.file) as f:
-            # for line in f:
         for line in shape_paths:
                 mesh = {}
                 mesh_path = line 
-                # mesh_path = os.path.join(self.root,line.strip())
                 mesh["rotate"]=False
-                mesh["jitter"] = False
                 mesh["scale"] = False
                 mesh["path"] = mesh_path
                 
@@ -136,18 +83,12 @@ class getDataset(data.Dataset):
             vertices, faces = load_ply_data(fn["path"])
 
         # vertices = uniform_sampling(vertices, faces, 2500)
-        # vertices = uniform_sampling(vertices, faces, 8000)
 
-        # print(fn["path"], 'scale ', fn["scale"], 'rotate ', fn["rotate"])
         if fn["scale"]:
             vertices = scale_vertices(vertices)
-        # if fn["rotate_angle"] == 0:
         if fn["rotate"]:
             vertices = rotate_vertices(vertices)
         
-        if fn["jitter"]:
-            vertices = jitter_vertices(vertices, sigma=0.005, clip=0.01, percent=0.30)
-
         vertices = normalize_shape(vertices)
         y_label = compute_Q_matrix(vertices, faces)
 

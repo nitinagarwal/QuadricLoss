@@ -1,27 +1,31 @@
+# Copyright (c) Nitin Agarwal (agarwal@uci.edu)
+# Last Modified:      Tue 20 Aug 2019 12:14:32 PM PDT
+
+from __future__ import print_function
 import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 from init import *
 
-# sys.path.append("../utils")
-# from baseline_utils import *
+sys.path.append('../utils/')
+from pc_utils import model_summary
 
-# dgcnn_net encoder
+
+"""Encoder"""
 class dgcnn_encoder(nn.Module):
-    """docstring for edge_conv_model"""
+    
     def __init__(self, k=20):
         super(dgcnn_encoder, self).__init__()
 
         self.k = k
 
-        self.conv1 = nn.Conv2d(6, 64, kernel_size=1)
-        self.conv2 = nn.Conv2d(128, 64, kernel_size=1)
-        self.conv3 = nn.Conv2d(128, 64, kernel_size=1)
-        self.conv4 = nn.Conv2d(128, 128, kernel_size=1)
-        self.conv5 = nn.Conv2d(320, 1024, kernel_size=1)
+        self.conv1 = nn.Conv2d(6, 64, kernel_size=1, bias=False)
+        self.conv2 = nn.Conv2d(128, 64, kernel_size=1, bias=False)
+        self.conv3 = nn.Conv2d(128, 64, kernel_size=1, bias=False)
+        self.conv4 = nn.Conv2d(128, 128, kernel_size=1, bias=False)
+        self.conv5 = nn.Conv2d(320, 1024, kernel_size=1, bias=False)
 
         self.bn1 = nn.BatchNorm2d(64)
         self.bn2 = nn.BatchNorm2d(64)
@@ -29,9 +33,11 @@ class dgcnn_encoder(nn.Module):
         self.bn4 = nn.BatchNorm2d(128)
         self.bn5 = nn.BatchNorm2d(1024)
 
+        self.leaky_relu = nn.LeakyReLU(negative_slope=0.2)
+
     def forward(self, x):
 
-        x = torch.transpose(x,2,1).contiguous()
+        x = torch.transpose(x,2,1)
         B, N, D = x.size()
 
         # Bx6xNxk
@@ -41,7 +47,7 @@ class dgcnn_encoder(nn.Module):
         edge_feat = edge_feat.permute(0,3,1,2)
 
         # Bx64xNx1
-        x = self.bn1(F.relu(self.conv1(edge_feat)))
+        x = self.leaky_relu(self.bn1(self.conv1(edge_feat)))
         x,_ = torch.max(x, dim=-1, keepdim=True)
         x1 = x
 
@@ -53,7 +59,7 @@ class dgcnn_encoder(nn.Module):
         edge_feat = edge_feat.permute(0,3,1,2)
 
         # Bx64xNx1
-        x = self.bn2(F.relu(self.conv2(edge_feat)))
+        x = self.leaky_relu(self.bn2(self.conv2(edge_feat)))
         x,_ = torch.max(x, dim=-1, keepdim=True)
         x2 = x
 
@@ -65,7 +71,7 @@ class dgcnn_encoder(nn.Module):
         edge_feat = edge_feat.permute(0,3,1,2)
 
         # Bx64xNx1
-        x = self.bn3(F.relu(self.conv3(edge_feat)))
+        x = self.leaky_relu(self.bn3(self.conv3(edge_feat)))
         x,_ = torch.max(x, dim=-1, keepdim=True)
         x3 = x
 
@@ -77,19 +83,18 @@ class dgcnn_encoder(nn.Module):
         edge_feat = edge_feat.permute(0,3,1,2)
 
         # Bx128xNx1
-        x = self.bn4(F.relu(self.conv4(edge_feat)))
+        x = self.leaky_relu(self.bn4(self.conv4(edge_feat)))
         x,_ = torch.max(x, dim=-1, keepdim=True)
         x4 = x
 
         # Bx1024x1x1    same as conv1d
-        x = self.bn5(F.relu(self.conv5(torch.cat((x1, x2, x3, x4), 1))))
+        x = self.leaky_relu(self.bn5(self.conv5(torch.cat((x1, x2, x3, x4), 1))))
         x,_ = torch.max(x, dim=2, keepdim=True)
 
         # Bx1024
         x = x.view(B, -1)
 
         return x
-
 
 
 """ Decoders"""
@@ -109,7 +114,6 @@ class PointGenCon(nn.Module):
 
     def forward(self, x):
         batchsize = x.size()[0]
-        # print(x.size())
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
@@ -117,10 +121,9 @@ class PointGenCon(nn.Module):
         return x
 
 
-
-class AE_AtlasNet(nn.Module):
+class DG_AtlasNet(nn.Module):
     def __init__(self, num_points = 2048, bottleneck_size = 1024, nb_primitives = 1, K=20):
-        super(AE_AtlasNet, self).__init__()
+        super(DG_AtlasNet, self).__init__()
         
         self.num_points = num_points
         self.bottleneck_size = bottleneck_size
@@ -135,16 +138,16 @@ class AE_AtlasNet(nn.Module):
         
         self.decoder = nn.ModuleList([PointGenCon(bottleneck_size = 2 +self.bottleneck_size) for i in range(0,self.nb_primitives)])
 
-
     def forward(self, x):
         x = self.encoder(x)
         outs = []
         for i in range(0,self.nb_primitives):
-            rand_grid = Variable(torch.cuda.FloatTensor(x.size(0),2,self.num_points//self.nb_primitives))
+            rand_grid = torch.cuda.FloatTensor(x.size(0),2,self.num_points//self.nb_primitives)
             rand_grid.data.uniform_(0,1)
             y = x.unsqueeze(2).expand(x.size(0),x.size(1), rand_grid.size(2)).contiguous()
             y = torch.cat( (rand_grid, y), 1).contiguous()
             outs.append(self.decoder[i](y))
+
         return torch.cat(outs,2).contiguous()
 
     def forward_inference(self, x, grid):
@@ -177,33 +180,19 @@ class AE_AtlasNet(nn.Module):
 
 if __name__ == '__main__':
 
-    for item in range(1):
         
-        B, N, D = 2, 2500, 3
+    B, N, D = 2, 2500, 3
 
-        data = Variable(torch.rand(B, D, N))
+    data = torch.rand(B, D, N)
 
-        # network = AE_Baseline(num_points = 2000, bottleneck_size = 1024)
-        # network = AE_Baseline_normal(num_points = 2000, bottleneck_size = 1024)
-        network = AE_AtlasNet(num_points = 2500, bottleneck_size = 1024, nb_primitives=25)
-        network.cuda()
-        print(model_summary(network, True))
+    net = DG_AtlasNet(num_points = 2500, bottleneck_size = 1024, nb_primitives=25)
+    net.cuda()
+    model_summary(net, True)
 
-        data = data.cuda()
-        out = network(data)
-        print('input data size: ', data.size())
-        print('output data size: ', out.size())
+    data = data.cuda()
+    out = net(data)
+    print('input data size: ', data.size())
+    print('output data size: ', out.size())
 
-
-    # if __name__ == "__main__":
-    #     B, N, D = 2, 2000, 3
-
-    #     net = dgcnn_net()
-    #     net = net.cuda()
-
-    #     out = net(points)
-
-    #     print('input size ', points.size())
-    #     print('output size ', out.size())
 
 
