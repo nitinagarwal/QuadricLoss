@@ -5,7 +5,7 @@ We propose a new point-to-surface based loss function named Quadric Loss, which 
 
 ## Getting Started
 
-This implementation uses Pytorch version 1.0. 
+This implementation uses Pytorch. 
 
 ### Installation
 
