@@ -24,7 +24,7 @@ pip install -r requirements.txt
 
 The code has been tested with pytorch 1.0.0 and python 2.7.16
 
-### Training with Various Loss Functions
+### Data
 
 Note we use 5000 meshes from the [[ABC dataset]](https://deep-geometry.github.io/abc-dataset/) and process them to obtain approx 8064 meshes each containing 2500 vertices (for details on processing please refer to the paper). When using this dataset make sure to respect the ABC dataset license. 
 
@@ -33,6 +33,7 @@ Download the provided dataset.
 bash ./scripts/download_data.sh
 ```
 
+### Training with Various Loss Functions
 
 Launch the visdom server
 ```
@@ -45,7 +46,7 @@ export CUDA_VISIBLE_DEVICES=0  #whichever gpu you want to use
 bash ./scripts/train.sh
 ```
 
-Monitor your training on [[http://localhost:8888/]][http://localhost:8888/]
+Monitor your training on [[http://localhost:8888/]](http://localhost:8888/)
 
 To train with other (or a combination of) loss functions add appropriate weights in ./scripts/train.sh.
 
