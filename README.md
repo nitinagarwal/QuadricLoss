@@ -51,7 +51,7 @@ Monitor your training on [http://localhost:8888/](http://localhost:8888/)
 To train with other (or a combination of) loss functions add appropriate weights in ./scripts/train.sh.
 
 
-### Recontructing Meshes at Inference
+### Recontructing Meshes using Trained Models
 
 Change the path for the pretrained model and the output folder in ./scripts/inference.sh.
 
