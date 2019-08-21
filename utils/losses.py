@@ -26,9 +26,10 @@ def chamferLoss(V1, V2, average=True):
     rx = xx[:, diag_ind, diag_ind].unsqueeze(1).expand_as(xx)
     ry = yy[:, diag_ind, diag_ind].unsqueeze(1).expand_as(yy)
     P = (rx.transpose(2,1) + ry - 2*zz)
-   
-    dis1, idx1 = P.min(1)
-    dis2, idx2 = P.min(2)
+  
+    dis1, idx1 = P.min(2)
+    dis2, idx2 = P.min(1)
+    # dis2, idx2 = P.min(2)
 
     if average:
         # average across all points and batches

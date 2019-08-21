@@ -47,7 +47,7 @@ opt = parser.parse_args()
 print (opt)
 
 if not os.path.exists(opt.outf):
-    os.mkdirs(opt.outf)
+    os.makedirs(dir_name)
 
 
 # ===================CREATE DATASET================================= #
