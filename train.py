@@ -77,7 +77,7 @@ val_output_3D = create_visdom_curve(viz, typ='scatter', viz_env=opt.viz_env)
 dir_name =  os.path.join('log', opt.logf)
 
 if not os.path.exists(dir_name):
-    os.mkdir(dir_name)
+    os.mkdirs(dir_name)
 
 logname = os.path.join(dir_name, 'log.txt')
 
