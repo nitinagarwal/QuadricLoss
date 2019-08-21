@@ -3,10 +3,10 @@
 # training the network
 
 python train.py \
-    --dataDir /home/minions/Dropbox/GraphicsLab/Projects/3D_Content_Creation/data/all_data \
+    --dataDir ./data \
     --num_points 2500 \
     --cls abc_2.5k \
-    --batchSize 2 \
+    --batchSize 12 \
     --nepoch 300 \
     --logf log1 \
     --chamLoss_wt 0.0 \

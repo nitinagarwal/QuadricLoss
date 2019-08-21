@@ -26,7 +26,7 @@ The code has been tested with pytorch 1.0.0 and python 2.7.16
 
 ### Data
 
-Note we use 5000 meshes from the [ABC dataset](https://deep-geometry.github.io/abc-dataset/) and process them to obtain approx 8064 meshes each containing 2500 vertices (for details on processing please refer to the paper). When using this dataset make sure to respect the ABC dataset license. 
+Note we use 5000 meshes from the [ABC dataset](https://deep-geometry.github.io/abc-dataset/) and process them to obtain approximately 8064 meshes each containing 2500 vertices (for details on processing please refer to the paper). When using this dataset make sure to respect the ABC dataset license. 
 
 Download the provided dataset. 
 ```
