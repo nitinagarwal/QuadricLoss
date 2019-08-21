@@ -223,7 +223,7 @@ def test(ep):
             recon_vertices = torch.cat([torch.index_select(a, 0, ind).unsqueeze(0) for a, ind in zip(recon_points, corres)])
             recon_points = recon_vertices
             
-            quadLoss = quadratic_error_loss(Q, recon_points)
+            quadLoss = quadric_loss(Q, recon_points)
             sufNorLoss = surface_normal_loss(points, adj, recon_points, normal)
             sufLoss = surfaceLoss(recon_points, face_coords)
 
