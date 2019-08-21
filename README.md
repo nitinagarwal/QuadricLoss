@@ -26,7 +26,7 @@ The code has been tested with pytorch 1.0.0 and python 2.7.16
 
 ### Data
 
-Note we use 5000 meshes from the [[ABC dataset]](https://deep-geometry.github.io/abc-dataset/) and process them to obtain approx 8064 meshes each containing 2500 vertices (for details on processing please refer to the paper). When using this dataset make sure to respect the ABC dataset license. 
+Note we use 5000 meshes from the [ABC dataset](https://deep-geometry.github.io/abc-dataset/) and process them to obtain approx 8064 meshes each containing 2500 vertices (for details on processing please refer to the paper). When using this dataset make sure to respect the ABC dataset license. 
 
 Download the provided dataset. 
 ```
@@ -46,11 +46,20 @@ export CUDA_VISIBLE_DEVICES=0  #whichever gpu you want to use
 bash ./scripts/train.sh
 ```
 
-Monitor your training on [[http://localhost:8888/]](http://localhost:8888/)
+Monitor your training on [http://localhost:8888/](http://localhost:8888/)
 
 To train with other (or a combination of) loss functions add appropriate weights in ./scripts/train.sh.
 
 
+### Recontructing Meshes at Inference
+
+Change the path for the pretrained model and the output folder in ./scripts/inference.sh.
+
+```
+bash ./scripts/inference.sh
+```
+
+The reconstructed point clouds and the meshes can be visualized using [MeshLab](http://www.meshlab.net/)
 
 
 ## Citation
@@ -68,4 +77,4 @@ If you find this code useful, please consider citing our paper
 Our code is released under MIT license (see License file for details)
 
 ## Contact
-Please contact [[Nitin Agarwal]](https://www.ics.uci.edu/~agarwal/) if you have questions or comments
+Please contact [Nitin Agarwal](https://www.ics.uci.edu/~agarwal/) if you have questions or comments

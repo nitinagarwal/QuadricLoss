@@ -1,5 +1,8 @@
 # Copyright (c) 2019 Nitin Agarwal (agarwal@uci.edu)
 
+# parts of the code was borrowed from 
+# 1. Atlasnet(https://github.com/ThibaultGROUEIX/AtlasNet/blob/master/auxiliary/model.py) 
+# 2. DGCNN (https://github.com/WangYueFt/dgcnn/blob/master/pytorch/model.py)
 
 from __future__ import print_function
 import sys
