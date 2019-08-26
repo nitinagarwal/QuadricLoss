@@ -28,9 +28,9 @@ from provider import *
 # ==============================================PARAMETERS======================================== #
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataDir', type=str, default=" ", help='input data dir')
-parser.add_argument('--augment', type=bool, default=False,  help='augmentation')
+parser.add_argument('--augment', action='store_true',  help='Data Augmentation')
 parser.add_argument('--num_points', type=int, default = 2500,  help='number of points')
-parser.add_argument('--small', type=bool, default=False,  help='train with small dataset')
+parser.add_argument('--small', action='store_true', help='train with small dataset')
 parser.add_argument('--cls', nargs="+", type=str, help='shape dataset')
 parser.add_argument('--seed', type=int, default=None,  help='seed')
 
@@ -53,11 +53,9 @@ parser.add_argument('--sufLoss_wt', type=float, default=0.0, help='sufLoss_wt')
 # Optimization 
 parser.add_argument('--lr', type=float, default=0.001, help='initial learning rate')
 parser.add_argument('--wd', type=float, default=0, help='weight decay')
-
 parser.add_argument('--momentum', type=float, default=0, help='momentum')
 parser.add_argument('--lr_decay', type=float, default=0.1, help='learning rate decay lr_steps')
-parser.add_argument('--lr_steps', default=200, nargs="+", type=int ,help='List of epochs where the learning rate is decreased by lr_decay')
-parser.add_argument('--lr_step_size', default=100, type=int ,help='step size where the learning rate is decreased by lr_decay')
+parser.add_argument('--lr_steps', default=100, type=int ,help='step size where the learning rate is decreased by lr_decay')
 
 opt = parser.parse_args()
 print (opt)
@@ -114,7 +112,7 @@ if opt.model != 'None':
 
 
 optimizer = optim.Adam(network.parameters(), lr = opt.lr, weight_decay=opt.wd)
-scheduler = lr_scheduler.StepLR(optimizer, step_size=opt.lr_step_size, gamma=opt.lr_decay) 
+scheduler = lr_scheduler.StepLR(optimizer, step_size=opt.lr_steps, gamma=opt.lr_decay) 
 
 
 train_loss = AverageValueMeter()
@@ -209,7 +207,6 @@ def test(ep):
             adj = adj.cuda()
             normal = normal.cuda()
             face_coords = face_coords.cuda()
-
 
             recon_points  = network(points) 
             

@@ -89,7 +89,7 @@ class getDataset(data.Dataset):
             vertices = rotate_vertices(vertices)
         
         vertices = normalize_shape(vertices)
-        y_label = compute_Q_matrix(vertices, faces)
+        Q = compute_Q_matrix(vertices, faces)
 
         adj = get_adjacency_matrix(vertices, faces, K_max=271)
         face_coords = get_face_coordinates(vertices, faces, K_max=271)
@@ -97,13 +97,13 @@ class getDataset(data.Dataset):
         # vertices = farthest_point_sample(vertices, 2500)
         
         vertices = self.convert_to_tensor(vertices)
-        y_label = self.convert_to_tensor(y_label)
-        y_label = y_label.view(vertices.size()[0], -1)
+        Q = self.convert_to_tensor(Q)
+        Q = Q.view(vertices.size()[0], -1)
         adj = self.convert_to_tensor(adj)
         normal = self.convert_to_tensor(normal)
         face_coords = self.convert_to_tensor(face_coords)
 
-        return vertices, y_label, adj, normal, face_coords
+        return vertices, Q, adj, normal, face_coords
 
 
     def convert_to_tensor(self, x):

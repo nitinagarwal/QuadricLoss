@@ -3,4 +3,5 @@ log/*
 out/*
 *.pyc
 models/*.pyc
+models/pointNet.py
 utils/*.pyc

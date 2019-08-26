@@ -84,7 +84,7 @@ def surface_normal_loss(ver, adj, corres, normal):
     # compute the mask for K = 0
     mask = adj.gt(0).float()
 
-    # edges - Bx N x K x 3 (check this should it be ver or corres)
+    # edges - Bx N x K x 3 
     edges = torch.cat([torch.index_select(a, 0, i).unsqueeze(0) for a, i in zip(ver, adj) ])
     edges = edges.view(B, N, -1, 3)
 
