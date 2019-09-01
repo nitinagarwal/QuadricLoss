@@ -30,8 +30,8 @@ from losses import *
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataDir', type=str, default=" ", help='input data dir')
 parser.add_argument('--cls', nargs="+", type=str, help='which category')
-parser.add_argument('--augment', type=bool, default=False,  help='augmentation')
-parser.add_argument('--small', type=bool, default=False,  help='train with small dataset')
+parser.add_argument('--augment', action='store_true',  help='Data Augmentation')
+parser.add_argument('--small', action='store_true', help='train with small dataset')
 
 parser.add_argument('--model', type=str, default = '',  help='load pretrained model')
 parser.add_argument('--outf', type=str, default = 'out1',  help='out folder')
@@ -40,8 +40,10 @@ parser.add_argument('--nb_primitives', type=int, default=25, help='primitives')
 parser.add_argument('--num_points', type=int, default=2500,  help='# points in reconstructed mesh')
 parser.add_argument('--bottleneck_size', type=int, default=1024, help='embedding size')
 
-parser.add_argument('--chamLoss_wt', type=bool, default=False, help='chamfer loss wt')
-parser.add_argument('--quadLoss_wt', type=bool, default=False, help='quadric loss wt')
+parser.add_argument('--chamLoss_wt', action='store_true',  help='compute chamfer loss')
+parser.add_argument('--quadLoss_wt', action='store_true',  help='compute quadric loss')
+# parser.add_argument('--chamLoss_wt', type=bool, default=False, help='chamfer loss wt')
+# parser.add_argument('--quadLoss_wt', type=bool, default=False, help='quadric loss wt')
 
 opt = parser.parse_args()
 print (opt)
@@ -166,8 +168,8 @@ with torch.no_grad():
         recon_points = recon_points.squeeze(0)
         
         save_xyz_data(os.path.join(opt.outf, mesh_name+'.xyz'), points.data.cpu())
-        save_xyz_data(os.path.join(opt.outf, mesh_name+'_recon.xyz'), recon_points.data.cpu())
-        save_obj_data(os.path.join(opt.outf, mesh_name+'_recon.obj'), recon_points.data.cpu(), faces)
+        save_xyz_data(os.path.join(opt.outf, mesh_name+'_recon.xyz'), recon_points.data.cpu())            # recon points
+        save_obj_data(os.path.join(opt.outf, mesh_name+'_recon.obj'), recon_points.data.cpu(), faces)     # recon mesh
 
     print('Mean %d values is %f' %(len(loss), np.mean(loss)))
     print('Median %d values is %f' %(len(loss), np.median(loss)))
