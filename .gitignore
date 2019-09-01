@@ -5,3 +5,4 @@ out/*
 models/*.pyc
 models/pointNet.py
 utils/*.pyc
+losses.py
