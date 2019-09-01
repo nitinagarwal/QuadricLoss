@@ -157,7 +157,7 @@ class DG_AtlasNet(nn.Module):
         x = self.encoder(x)
         outs = []
         for i in range(0,self.nb_primitives):
-            rand_grid = Variable(torch.cuda.FloatTensor(grid[i]))
+            rand_grid = torch.cuda.FloatTensor(grid[i])
             rand_grid = rand_grid.transpose(0,1).contiguous().unsqueeze(0)
             rand_grid = rand_grid.expand(x.size(0),rand_grid.size(1), rand_grid.size(2)).contiguous()
             # print(rand_grid.sizerand_grid())
@@ -169,7 +169,7 @@ class DG_AtlasNet(nn.Module):
     def forward_inference_from_latent_space(self, x, grid):
         outs = []
         for i in range(0,self.nb_primitives):
-            rand_grid = Variable(torch.cuda.FloatTensor(grid[i]))
+            rand_grid = torch.cuda.FloatTensor(grid[i])
             rand_grid = rand_grid.transpose(0,1).contiguous().unsqueeze(0)
             rand_grid = rand_grid.expand(x.size(0),rand_grid.size(1), rand_grid.size(2)).contiguous()
             # print(rand_grid.sizerand_grid())

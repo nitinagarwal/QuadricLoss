@@ -2,10 +2,10 @@
 
 
 python inference.py \
-    --dataDir ../../data/all_data \
+    --dataDir ./data \
     --cls  modelNet40_2.5k \
-    --model ./out/log30/best_net_201.pth \
-    --outf ./out/log30 \
+    --model ./out/log1/best_net__.pth \
+    --outf ./out/log1 \
     --type test \
     --num_points 2500 \
-    --quadLoss_wt \
+    --chamLoss_wt \
