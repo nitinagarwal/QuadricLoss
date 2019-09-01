@@ -42,8 +42,6 @@ parser.add_argument('--bottleneck_size', type=int, default=1024, help='embedding
 
 parser.add_argument('--chamLoss_wt', action='store_true',  help='compute chamfer loss')
 parser.add_argument('--quadLoss_wt', action='store_true',  help='compute quadric loss')
-# parser.add_argument('--chamLoss_wt', type=bool, default=False, help='chamfer loss wt')
-# parser.add_argument('--quadLoss_wt', type=bool, default=False, help='quadric loss wt')
 
 opt = parser.parse_args()
 print (opt)
