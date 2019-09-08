@@ -1,5 +1,5 @@
 # Emebedding 3D models with Quadric Loss 
-### BMVC 2019 [[Paper]](https://arxiv.org/abs/1907.10250)[[Project Page]](https://www.ics.uci.edu/~agarwal/quadLoss/index.html)
+### BMVC 2019 [[Paper]](https://arxiv.org/abs/1907.10250)[[Project Page]](https://www.ics.uci.edu/~agarwal/quadricLoss/index.html)
 
 We propose a new point-to-surface based loss function named Quadric Loss, which minimizes the quadric error between the reconstructed points and the input surface. Unlike Chamfers or L2 which are spherical losses (equidistant points have equal error), Quadric loss is a ellipsoidal loss, which penalizes displacements of points more in the normal direction thereby preserving sharp features and edges in the output reconstruction.
 
