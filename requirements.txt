@@ -1,6 +1,6 @@
 backports-abc==0.5
 backports.functools-lru-cache==1.5
-certifi==2019.6.16
+certifi==2022.12.7
 chardet==3.0.4
 cycler==0.10.0
 futures==3.3.0
